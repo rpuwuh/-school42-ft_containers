@@ -1,5 +1,7 @@
 {
 	"files.associations": {
-		"vector": "cpp"
+		"vector": "cpp",
+		"memory_resource": "cpp",
+		"memory": "cpp"
 	}
 }

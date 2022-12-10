@@ -9,6 +9,8 @@
 *.slo
 *.lo
 *.o
+./objects/
+./objects/*.o
 *.obj
 
 # Precompiled Headers
