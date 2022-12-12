@@ -2,6 +2,7 @@
 	"files.associations": {
 		"vector": "cpp",
 		"memory_resource": "cpp",
-		"memory": "cpp"
+		"memory": "cpp",
+		"stdexcept": "cpp"
 	}
 }
