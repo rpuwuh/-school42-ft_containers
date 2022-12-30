@@ -2,6 +2,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,visualstudiocode,c++
 
 ### C++ ###
+test.cpp
 # Prerequisites
 *.d
 
