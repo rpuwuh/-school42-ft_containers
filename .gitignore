@@ -34,6 +34,7 @@ test.cpp
 *.lib
 
 # Executables
+./program
 *.exe
 *.out
 *.app
