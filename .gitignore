@@ -3,6 +3,7 @@
 
 ### C++ ###
 test.cpp
+./containers_test
 # Prerequisites
 *.d
 

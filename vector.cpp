@@ -6,7 +6,7 @@
 /*   By: bpoetess <bpoetess@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 17:06:15 by bpoetess          #+#    #+#             */
-/*   Updated: 2022/12/26 21:08:08 by bpoetess         ###   ########.fr       */
+/*   Updated: 2023/01/09 19:32:23 by bpoetess         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,13 +39,7 @@ public:
   typedef typename Allocator::pointer pointer;
   typedef typename Allocator::const_pointer const_pointer;
 
-  struct iterator {
-  private:
-    T *ptr;
-
-  public:
-    T &operator*() const { return *ptr; }
-  };
+  typedef T* iterator;
 
   size_type capacity() const { return (this->allocatedElements); }
 
@@ -53,6 +47,7 @@ public:
   size_type max_size() const {
     return (std::numeric_limits<difference_type>::max());
   }
+  allocator_type get_allocator() const {Allocator alloc; return (alloc); }
   bool empty() const {
     if (this->constructedElements > 0)
       return (true);
@@ -63,7 +58,7 @@ public:
     T *ptrTmp;
     Allocator alloc;
 
-    if (new_cap <= this->size())
+    if (new_cap <= this->constructedElements)
       return;
     if (new_cap > max_size())
       throw(std::length_error("length_error"));
@@ -85,22 +80,26 @@ public:
     this->allocatedElements = new_cap;
   }
 
-  void resize(size_type count) { this->resize(count, T()); }
   void resize(size_type count, T value = T()) {
     Allocator alloc;
 
-    if (count == this->allocatedElements)
+    if (count == this->constructedElements)
       return;
+
     if (count > this->allocatedElements)
       reserve(count);
-    else {
-      for (size_t i = count; i < this->constructedElements; i++)
+    else if (count < this->constructedElements) {
+      for (size_t i = this->constructedElements; i < count; i++)
         alloc.destroy(this->array + i);
+      this->constructedElements = count;
+      return ;
     }
+
     for (size_t i = this->constructedElements; i < count; i++)
-      this->array[i] = value;
+      this->array[i] = T(value);
     this->constructedElements = count;
   }
+  void resize(size_type count) { this->resize(count, T()); }
 
   void clear() {
     Allocator alloc;
@@ -111,21 +110,47 @@ public:
   }
 
   reference at(size_type pos) {
-    if (!(pos < this->constructedElements))
+    if (!(pos < this->allocatedElements))
       throw(std::out_of_range("out of range"));
     return (&this->array[pos]);
   }
-  reference back()
-  {
+  const_reference at( size_type pos ) const {
+    if (!(pos < this->allocatedElements))
+      throw(std::out_of_range("out of range"));
+    return (&this->array[pos]);
+  }
+
+  reference back() {
     if (!this->constructedElements)
       return(T());
     return(&this->array[this->constructedElements]);
   }
-  reference front()
-  {
+  const_reference back() const {
+    if (!this->constructedElements)
+      return(T());
+    return(&this->array[this->constructedElements]);
+  }
+
+  reference front() {
     if (!this->constructedElements)
       return(T());
     return(&this->array[0]);
+  }
+  const_reference front() const {
+    if (!this->constructedElements)
+      return(T());
+    return(&this->array[0]);
+  }
+
+  T* data() {
+    if (!this->capacity)
+      return (NULL);
+    return (this->array);
+  }
+  const T* data() const {
+    if (!this->capacity)
+      return (NULL);
+    return (this->array);
   }
 
   vector<T> &operator=(vector<T> const &obj) {
@@ -135,7 +160,7 @@ public:
     alloc.deallocate(this->array, this->capacity());
     this->allocatedElements = 0;
     this->constructedElements = 0;
-    this->array = 0;
+    this->array = NULL;
     this->reserve(obj.allocatedElements);
     for (size_t i = 0; i < obj.constructedElements; i++) {
       try {
@@ -144,7 +169,7 @@ public:
         for (size_t j = 0; j < i; j++)
           alloc.destroy(this->array + j);
         alloc.deallocate(this->array, obj.allocatedElements);
-        this->array = 0;
+        this->array = NULL;
         this->allocatedElements = 0;
         this->constructedElements = 0;
         throw(e);
@@ -153,23 +178,21 @@ public:
     return (*this);
   }
 
-  vector(vector<T> &originVector) { *this = originVector; }
   reference operator[](size_type pos) {
     if (this->allocatedElements - 1 < pos)
-      return (array[pos]);
+      return (&array[pos]);
     return (T());
   }
   const_reference operator[](size_type pos) const {
     if (this->allocatedElements - 1 < pos)
-      return (array[pos]);
+      return (&array[pos]);
     return (T());
   }
   
   vector() {
     this->allocatedElements = 0;
     this->constructedElements = 0;
-    this->array = 0;
-    std::cout << "this is c++ feature" << std::endl;
+    this->array = NULL;
   }
 
   ~vector() {
